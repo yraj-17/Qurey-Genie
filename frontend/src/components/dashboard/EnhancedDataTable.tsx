@@ -159,7 +159,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 text-gray-500">
+      <div className="flex items-center justify-center py-12 text-gray-500 dark:text-white/50">
         <div className="text-center">
           <div className="text-6xl mb-4">📊</div>
           <p className="text-lg font-medium mb-2">No data to display</p>
@@ -173,18 +173,18 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
     <div className="space-y-4">
       {/* SQL Query Viewer */}
       {sqlQuery && (
-        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
-          <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden bg-white dark:bg-[#11091f] shadow-sm dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+          <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
             <div className="flex items-center gap-3">
-              <Code className="h-4 w-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">SQL Query:</span>
+              <Code className="h-4 w-4 text-gray-600 dark:text-brand-300" />
+              <span className="text-sm font-medium text-gray-700 dark:text-white/80">SQL Query:</span>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={copySqlToClipboard}
-                className="h-8 text-xs hover:bg-gray-100"
+                className="h-8 text-xs hover:bg-gray-100 dark:hover:bg-white/10 dark:text-white/70"
               >
                 {sqlCopied ? (
                   <>
@@ -202,7 +202,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => setSqlVisible(!sqlVisible)}
-                className="h-8 text-xs hover:bg-gray-100"
+                className="h-8 text-xs hover:bg-gray-100 dark:hover:bg-white/10 dark:text-white/70"
               >
                 {sqlVisible ? (
                   <>
@@ -220,7 +220,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
           </div>
           
           {sqlVisible && (
-            <div className="px-4 py-3 bg-gray-900 text-gray-100 font-mono text-sm overflow-x-auto">
+            <div className="px-4 py-3 bg-gray-900 dark:bg-[#070510] text-gray-100 dark:text-white/85 font-mono text-sm overflow-x-auto">
               <pre className="whitespace-pre-wrap">{sqlQuery}</pre>
             </div>
           )}
@@ -228,22 +228,22 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
       )}
 
       {/* Query Results Section */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+      <div className="border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden bg-white dark:bg-[#11091f] shadow-sm dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
         {/* Query Results Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#11091f] border-b border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2">
-            <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 text-gray-600 dark:text-brand-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
-            <span className="text-sm font-semibold text-gray-800">Query Results</span>
+            <span className="text-sm font-semibold text-gray-800 dark:text-white">Query Results</span>
           </div>
-          <span className="text-sm text-gray-600 font-medium">{filteredData.length} rows returned</span>
+          <span className="text-sm text-gray-600 dark:text-white/60 font-medium">{filteredData.length} rows returned</span>
         </div>
 
         {/* Controls Bar */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#0a0814] border-b border-gray-100 dark:border-white/10">
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-sm font-semibold bg-gray-100 text-gray-800 px-3 py-1 rounded-md">
+            <Badge variant="secondary" className="text-sm font-semibold bg-gray-100 dark:bg-brand-500/15 text-gray-800 dark:text-brand-200 px-3 py-1 rounded-md dark:border dark:border-brand-400/30">
               {filteredData.length} rows
             </Badge>
           </div>
@@ -251,13 +251,13 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
           <div className="flex items-center gap-3">
             {searchable && (
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-white/40" />
                 <input
                   type="text"
                   placeholder="Search data..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2 w-64 border border-gray-300 dark:border-white/10 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-brand-500 focus:border-transparent dark:bg-white/5 dark:text-white dark:placeholder:text-white/40"
                 />
               </div>
             )}
@@ -268,7 +268,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={copyToClipboard}
-                  className="text-sm h-9 border-gray-300 hover:bg-gray-50"
+                  className="text-sm h-9 border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 dark:text-white/70"
                 >
                   <Copy className="h-4 w-4 mr-2" />
                   {copied ? 'Copied' : 'Copy'}
@@ -278,7 +278,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={exportToCSV}
-                  className="text-sm h-9 border-gray-300 hover:bg-gray-50"
+                  className="text-sm h-9 border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 dark:text-white/70"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export CSV
@@ -292,30 +292,30 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-white border-b border-gray-200">
+              <tr className="bg-white dark:bg-[#0a0814] border-b border-gray-200 dark:border-white/10">
                 {columns.map((column, index) => (
                   <th
                     key={index}
-                    className="px-6 py-3 text-left text-sm font-semibold text-gray-800"
+                    className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-white/80"
                   >
                     {column}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-white dark:bg-[#11091f]">
               {paginatedData.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
                   {row.map((cell, cellIndex) => (
                     <td
                       key={cellIndex}
-                      className="px-6 py-3.5 text-sm text-gray-900"
+                      className="px-6 py-3.5 text-sm text-gray-900 dark:text-white/80"
                     >
                       {cell || (
-                        <span className="text-gray-400 italic text-xs">NULL</span>
+                        <span className="text-gray-400 dark:text-white/35 italic text-xs">NULL</span>
                       )}
                     </td>
                   ))}
@@ -327,8 +327,8 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
 
         {/* Pagination */}
         {showPagination && totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-4 bg-white border-t border-gray-200">
-            <div className="text-sm text-gray-600">
+          <div className="flex items-center justify-between px-4 py-4 bg-white dark:bg-[#0a0814] border-t border-gray-200 dark:border-white/10">
+            <div className="text-sm text-gray-600 dark:text-white/60">
               Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} results
             </div>
             
@@ -338,7 +338,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
                 size="sm"
                 onClick={handlePrevious}
                 disabled={currentPage === 1}
-                className="h-9 px-3 border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                className="h-9 px-3 border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium dark:text-white/70"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Previous
@@ -348,7 +348,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
                 {getPageNumbers().map((page, index) => (
                   <React.Fragment key={index}>
                     {page === '...' ? (
-                      <span className="px-2 text-gray-500 text-sm">...</span>
+                      <span className="px-2 text-gray-500 dark:text-white/45 text-sm">...</span>
                     ) : (
                       <Button
                         variant={currentPage === page ? "default" : "outline"}
@@ -356,8 +356,8 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
                         onClick={() => handlePageChange(page as number)}
                         className={`h-9 min-w-[36px] px-3 text-sm font-medium ${
                           currentPage === page
-                            ? "bg-gray-900 text-white hover:bg-gray-800 border-gray-900"
-                            : "border-gray-300 hover:bg-gray-50 text-gray-700"
+                            ? "bg-gray-900 dark:bg-brand-600 text-white hover:bg-gray-800 dark:hover:bg-brand-500 border-gray-900 dark:border-brand-500"
+                            : "border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 text-gray-700 dark:text-white/70"
                         }`}
                       >
                         {page}
@@ -372,7 +372,7 @@ const EnhancedDataTable: React.FC<EnhancedDataTableProps> = ({
                 size="sm"
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-                className="h-9 px-3 border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                className="h-9 px-3 border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium dark:text-white/70"
               >
                 Next
                 <ChevronRight className="h-4 w-4 ml-1" />

@@ -235,16 +235,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     <div 
       ref={chatContainerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto bg-white"
+      className="flex-1 overflow-y-auto bg-white dark:bg-[#070510]"
     >
       <div className="max-w-4xl mx-auto px-4">
         <div className="space-y-6 [&>*:first-child]:!mt-0 [&>*:first-child]:!pt-0 pb-4">
         {messages.length === 0 ? (
           <div className="text-center pb-12 max-w-2xl mx-auto pt-0">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Welcome to Query Genie
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 dark:text-white/65 mb-8">
              Ask questions in plain English and get instant answers from your database—no SQL required
             </p>
            
@@ -267,13 +267,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
                           onKeyDown={(e) => handleEditKeyDown(e, message.id)}
-                          className="w-full min-h-[100px] max-h-[300px] bg-white text-gray-900 border-2 border-blue-500 rounded-2xl focus:ring-0 focus:border-blue-600 mb-3 resize-none p-4 text-base shadow-sm"
+                          className="w-full min-h-[100px] max-h-[300px] bg-white dark:bg-[#11091f] text-gray-900 dark:text-white border-2 border-blue-500 dark:border-brand-500 rounded-2xl focus:ring-0 focus:border-blue-600 dark:focus:border-brand-400 mb-3 resize-none p-4 text-base shadow-sm"
                           autoFocus
                           rows={3}
                         />
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3 flex items-start gap-2">
+                        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-400/30 rounded-lg p-3 mb-3 flex items-start gap-2">
                           <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-gray-700 leading-relaxed">
+                          <p className="text-sm text-gray-700 dark:text-amber-100/80 leading-relaxed">
                             Editing this message will update your question. The AI will use the edited version to generate a new response.
                           </p>
                         </div>
@@ -282,14 +282,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                             size="sm"
                             variant="outline"
                             onClick={handleCancelEdit}
-                            className="h-10 px-5 text-sm font-medium border-gray-300 rounded-lg hover:bg-gray-100"
+                            className="h-10 px-5 text-sm font-medium border-gray-300 dark:border-white/10 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
                           >
                             Cancel
                           </Button>
                           <Button
                             size="sm"
                             onClick={() => handleSaveEdit(message.id)}
-                            className="h-10 px-5 text-sm font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900"
+                            className="h-10 px-5 text-sm font-medium bg-gray-800 dark:bg-brand-600 text-white rounded-lg hover:bg-gray-900 dark:hover:bg-brand-500"
                           >
                             Save
                           </Button>
@@ -297,7 +297,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                       </div>
                     ) : (
                       <>
-                        <div className="bg-blue-600 text-white px-4 py-3 rounded-lg shadow-sm">
+                        <div className="bg-blue-600 dark:bg-gradient-to-br dark:from-brand-500 dark:to-brand-700 text-white px-4 py-3 rounded-lg shadow-sm dark:shadow-brand">
                           {message.content}
                         </div>
                         <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity justify-end">
@@ -305,7 +305,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                             size="sm"
                             variant="ghost"
                             onClick={() => handleCopyMessage(message.id, message.content, true)}
-                            className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-white rounded-full border border-gray-200 shadow-sm"
+                            className="h-8 w-8 p-0 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-white/10 rounded-full border border-gray-200 dark:border-white/10 shadow-sm"
                             title="Copy"
                           >
                             {copiedMessageId === message.id ? (
@@ -319,7 +319,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                               size="sm"
                               variant="ghost"
                               onClick={() => handleStartEdit(message.id, message.content)}
-                              className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-white rounded-full border border-gray-200 shadow-sm"
+                              className="h-8 w-8 p-0 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-white/10 rounded-full border border-gray-200 dark:border-white/10 shadow-sm"
                               title="Edit"
                             >
                               <Edit2 className="h-4 w-4" />
@@ -336,7 +336,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             if (effectiveType === 'error') {
               return (
                 <div key={message.id} className="flex justify-center">
-                  <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg max-w-2xl flex items-start gap-3">
+                  <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-400/30 text-red-800 dark:text-red-100 px-4 py-3 rounded-lg max-w-2xl flex items-start gap-3">
                     <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
                     <div className="space-y-2">
                       <p className="font-medium">{message.content}</p>
@@ -344,7 +344,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         onClick={onConnectDatabase}
                         variant="outline"
                         size="sm"
-                        className="border-red-200 text-red-800 hover:bg-red-100"
+                        className="border-red-200 dark:border-red-400/30 text-red-800 dark:text-red-100 hover:bg-red-100 dark:hover:bg-red-500/20"
                       >
                         <Database size={16} className="mr-2" />
                         Connect Database
@@ -377,7 +377,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     {output && output.type === 'status' && (
                       <Alert className="border-green-500/50 bg-green-500/10">
                         <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        <AlertDescription className="text-green-700">
+                        <AlertDescription className="text-green-700 dark:text-green-200">
                           {output.message}
                           {output.affected_rows !== undefined && (
                             <span className="ml-2 font-semibold">
@@ -398,14 +398,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     )}
 
                     {output && output.type === 'confirmation_required' && (
-                      <Card className="p-4 border-yellow-500/50 bg-yellow-500/10">
+                      <Card className="p-4 border-yellow-500/50 bg-yellow-500/10 dark:border-yellow-400/40">
                         <div className="flex items-start gap-2">
                           <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
-                            <p className="font-semibold text-yellow-700 mb-2">
+                            <p className="font-semibold text-yellow-700 dark:text-yellow-200 mb-2">
                               ⚠️ Dangerous Operation Detected
                             </p>
-                            <p className="text-sm text-gray-600 mb-3">
+                            <p className="text-sm text-gray-600 dark:text-white/65 mb-3">
                               This query will modify or delete data. Please review carefully.
                             </p>
                             {output.table && (
@@ -425,8 +425,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     )}
 
                     {!output && (
-                      <Card className="p-4 bg-gray-50">
-                        <pre className="text-sm font-mono whitespace-pre-wrap break-all text-gray-700">
+                      <Card className="p-4 bg-gray-50 dark:bg-[#11091f] dark:border-white/10">
+                        <pre className="text-sm font-mono whitespace-pre-wrap break-all text-gray-700 dark:text-white/80">
                           {message.content}
                         </pre>
                       </Card>
@@ -437,7 +437,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         size="sm"
                         variant="ghost"
                         onClick={() => handleCopyMessage(message.id, message.content, false)}
-                        className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-white rounded-full border border-gray-200 shadow-sm"
+                        className="h-8 w-8 p-0 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-white/10 rounded-full border border-gray-200 dark:border-white/10 shadow-sm"
                         title="Copy"
                       >
                         {copiedMessageId === message.id ? (

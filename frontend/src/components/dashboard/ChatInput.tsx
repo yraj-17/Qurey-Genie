@@ -197,6 +197,14 @@ const ChatInput = ({ onSend, isLoading, isConnected, onOpenModal }: ChatInputPro
           background-clip: padding-box, border-box;
         }
 
+        .dark .gradient-border-active {
+          background: linear-gradient(#11091f, #11091f) padding-box,
+                      var(--gradient-border) border-box;
+          background-size: 200% 200%;
+          background-origin: border-box;
+          background-clip: padding-box, border-box;
+        }
+
         /* Custom scrollbar */
         textarea::-webkit-scrollbar {
           width: 6px;
@@ -216,17 +224,17 @@ const ChatInput = ({ onSend, isLoading, isConnected, onOpenModal }: ChatInputPro
         }
       `}</style>
 
-      <div className="bg-white px-4 py-6">
+      <div className="bg-white dark:bg-[#070510] px-4 py-6">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           {/* Main input container with gradient border */}
           <div 
             className={`
-              relative rounded-2xl transition-all duration-300 ease-out bg-white
+              relative rounded-2xl transition-all duration-300 ease-out bg-white dark:bg-[#11091f]
               ${showGradientBorder
                 ? 'gradient-border-active' 
                 : isFocused
-                ? 'ring-2 ring-gray-200' 
-                : 'ring-1 ring-gray-200'
+                ? 'ring-2 ring-gray-200 dark:ring-brand-500/30' 
+                : 'ring-1 ring-gray-200 dark:ring-white/10'
               }
             `}
             style={{
@@ -255,8 +263,8 @@ const ChatInput = ({ onSend, isLoading, isConnected, onOpenModal }: ChatInputPro
                 px-5 py-4 pr-28 
                 bg-transparent border-0 rounded-2xl 
                 focus:outline-none focus:ring-0 
-                text-[15px] leading-relaxed text-gray-900 
-                placeholder:text-gray-400 placeholder:font-normal
+                text-[15px] leading-relaxed text-gray-900 dark:text-white
+                placeholder:text-gray-400 dark:placeholder:text-white/40 placeholder:font-normal
                 overflow-y-auto
                 font-[system-ui,-apple-system,BlinkMacSystemFont,'Segoe_UI','Inter',sans-serif]
                 transition-all duration-200
@@ -276,12 +284,12 @@ const ChatInput = ({ onSend, isLoading, isConnected, onOpenModal }: ChatInputPro
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 hover:bg-gray-100 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
+                  className="h-9 w-9 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
                   onClick={onOpenModal}
                   disabled={isLoading}
                   title="Connect to database"
                 >
-                  <Database size={18} className="text-gray-600" />
+                  <Database size={18} className="text-gray-600 dark:text-white/70" />
                 </Button>
               )}
               <Button
@@ -291,7 +299,7 @@ const ChatInput = ({ onSend, isLoading, isConnected, onOpenModal }: ChatInputPro
                   h-9 w-9 rounded-xl transition-all duration-300 relative overflow-hidden
                   ${message.trim() && !isLoading
                     ? `bg-gradient-to-r ${gradientClassThemes[gradientIndex]} hover:scale-105 active:scale-95` 
-                    : 'bg-gray-200 cursor-not-allowed opacity-60'
+                    : 'bg-gray-200 dark:bg-white/10 cursor-not-allowed opacity-60'
                   }
                 `}
                 disabled={!message.trim() || isLoading}
@@ -308,22 +316,22 @@ const ChatInput = ({ onSend, isLoading, isConnected, onOpenModal }: ChatInputPro
           
           {/* Helper Text */}
           <div className="flex items-center justify-center mt-4 px-4">
-            <p className="text-[13px] text-gray-500 font-medium">
+            <p className="text-[13px] text-gray-500 dark:text-white/50 font-medium">
               {isConnected ? (
                 <span className="inline-flex items-center gap-2">
-                  <kbd className="px-1.5 py-0.5 text-[11px] font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded shadow-sm">
+                  <kbd className="px-1.5 py-0.5 text-[11px] font-semibold text-gray-600 dark:text-white/70 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded shadow-sm">
                     Enter
                   </kbd>
-                  <span className="text-gray-400">to send</span>
-                  <span className="text-gray-300">•</span>
-                  <kbd className="px-1.5 py-0.5 text-[11px] font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded shadow-sm">
+                  <span className="text-gray-400 dark:text-white/45">to send</span>
+                  <span className="text-gray-300 dark:text-white/20">•</span>
+                  <kbd className="px-1.5 py-0.5 text-[11px] font-semibold text-gray-600 dark:text-white/70 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded shadow-sm">
                     Shift + Enter
                   </kbd>
-                  <span className="text-gray-400">for new line</span>
+                  <span className="text-gray-400 dark:text-white/45">for new line</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-gray-500">
-                  <Database size={14} className="text-gray-400" />
+                <span className="inline-flex items-center gap-1.5 text-gray-500 dark:text-white/50">
+                  <Database size={14} className="text-gray-400 dark:text-brand-300" />
                   Connect to your database to start exploring
                 </span>
               )}
