@@ -1,10 +1,22 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AuthLayout from '@/components/auth/AuthLayout';
 import LoginForm from '@/components/auth/LoginForm';
 import SignupForm from '@/components/auth/SignupForm';
 
 const AuthPage = () => {
-  const [isSignup, setIsSignup] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isSignup, setIsSignup] = useState(searchParams.get('mode') === 'signup');
+
+  const switchToSignup = () => {
+    setIsSignup(true);
+    setSearchParams({ mode: 'signup' });
+  };
+
+  const switchToLogin = () => {
+    setIsSignup(false);
+    setSearchParams({});
+  };
 
   return (
     <AuthLayout 
@@ -15,9 +27,9 @@ const AuthPage = () => {
       }
     >
       {isSignup ? (
-        <SignupForm onSwitchToLogin={() => setIsSignup(false)} />
+        <SignupForm onSwitchToLogin={switchToLogin} />
       ) : (
-        <LoginForm onSwitchToSignup={() => setIsSignup(true)} />
+        <LoginForm onSwitchToSignup={switchToSignup} />
       )}
     </AuthLayout>
   );

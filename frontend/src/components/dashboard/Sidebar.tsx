@@ -548,20 +548,20 @@ const Sidebar = ({
       style={{ width: isCollapsed ? COLLAPSED_WIDTH : sidebarWidth }}
       className={`
         relative h-full 
-        bg-white dark:bg-slate-950 
-        border-r-2 border-slate-200/60 dark:border-slate-800/60
+        bg-white dark:bg-[#070510]
+        border-r-2 border-slate-200/60 dark:border-white/10
         transition-all duration-300 flex-shrink-0
       `}
     >
       <div className="flex flex-col h-full">
         {/* Header with menu toggle */}
-        <div className="flex items-center justify-end p-4 border-b-2 border-slate-200/60 dark:border-slate-800/60">
+        <div className="flex items-center justify-end p-4 border-b-2 border-slate-200/60 dark:border-white/10">
           <Button
             variant="ghost"
             size="sm"
             onClick={onToggleCollapse}
             className="
-              p-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 
+              p-2 hover:bg-indigo-50 dark:hover:bg-white/10
               rounded-xl transition-all duration-300 
               active:scale-90
               focus-visible:ring-4 focus-visible:ring-cyan-400/40
@@ -575,7 +575,7 @@ const Sidebar = ({
           {!isCollapsed && (
             <>
               {/* Connection status */}
-              <div className="p-4 border-b-2 border-slate-200/60 dark:border-slate-800/60">
+              <div className="p-4 border-b-2 border-slate-200/60 dark:border-white/10">
                 <div className="flex items-center gap-2.5 text-sm">
                   <div className={`relative w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                     isConnected 
@@ -597,7 +597,7 @@ const Sidebar = ({
 
               {/* Database connection buttons */}
               {!isConnected ? (
-                <div className="p-4 border-b-2 border-slate-200/60 dark:border-slate-800/60">
+              <div className="p-4 border-b-2 border-slate-200/60 dark:border-white/10">
                   <Button 
                     onClick={onOpenModal} 
                     size="sm" 
@@ -607,7 +607,7 @@ const Sidebar = ({
                       hover:from-indigo-500 hover:to-violet-500
                       text-white rounded-xl 
                       transition-all duration-300 
-                      shadow-lg shadow-indigo-500/30
+                      shadow-lg shadow-indigo-500/30 dark:shadow-[0_10px_30px_rgba(124,58,237,0.45)]
                       hover:shadow-xl hover:shadow-indigo-500/40
                       active:scale-95
                       font-semibold
@@ -619,7 +619,7 @@ const Sidebar = ({
                   </Button>
                 </div>
               ) : (
-                <div className="p-4 border-b-2 border-slate-200/60 dark:border-slate-800/60 space-y-2">
+                <div className="p-4 border-b-2 border-slate-200/60 dark:border-white/10 space-y-2">
                   <Button 
                     onClick={onOpenModal} 
                     variant="outline" 
@@ -662,7 +662,7 @@ const Sidebar = ({
               )}
 
               {/* Chat history header */}
-              <div className="flex items-center justify-between p-4 border-b-2 border-slate-200/60 dark:border-slate-800/60">
+              <div className="flex items-center justify-between p-4 border-b-2 border-slate-200/60 dark:border-white/10">
                 <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 tracking-tight">Chat History</h3>
                 <TooltipProvider>
                   <Tooltip>
@@ -673,7 +673,7 @@ const Sidebar = ({
                         onClick={onNewChat}
                         className="
                           h-8 w-8 p-0 
-                          hover:bg-indigo-50 dark:hover:bg-indigo-950/30 
+                          hover:bg-indigo-50 dark:hover:bg-white/10
                           rounded-xl transition-all duration-300 
                           active:scale-90
                           focus-visible:ring-4 focus-visible:ring-cyan-400/40

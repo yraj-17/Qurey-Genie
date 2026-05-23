@@ -49,15 +49,15 @@ const UserProfile = () => {
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
-            className="relative h-10 w-10 rounded-full bg-brand-100 hover:bg-brand-200 transition-colors"
+            className="relative h-10 w-10 rounded-full bg-brand-100 dark:bg-gradient-to-br dark:from-brand-500 dark:to-brand-800 hover:bg-brand-200 dark:hover:from-brand-400 dark:hover:to-brand-700 transition-colors dark:shadow-[0_0_24px_rgba(139,92,246,0.35)]"
           >
-            <div className="flex items-center justify-center w-full h-full text-brand-700 font-semibold text-sm">
+            <div className="flex items-center justify-center w-full h-full text-brand-700 dark:text-white font-semibold text-sm">
               {initials}
             </div>
           </Button>
         </DropdownMenuTrigger>
         
-        <DropdownMenuContent className="w-56 glass-elevated" align="end">
+        <DropdownMenuContent className="w-56 glass-elevated dark:bg-[#11091f]/95 dark:border-white/10 dark:text-white dark:shadow-[0_20px_60px_rgba(0,0,0,0.55)]" align="end">
           <DropdownMenuLabel>
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium">
@@ -69,12 +69,12 @@ const UserProfile = () => {
           
           <DropdownMenuSeparator />
           
-          <DropdownMenuItem onClick={() => setShowDetails(true)}>
+          <DropdownMenuItem onClick={() => setShowDetails(true)} className="dark:focus:bg-white/10">
             <User className="mr-2 h-4 w-4" />
             View Profile
           </DropdownMenuItem>
           
-          <DropdownMenuItem onClick={toggleTheme}>
+          <DropdownMenuItem onClick={toggleTheme} className="dark:focus:bg-white/10">
             {theme === 'light' ? (
               <>
                 <Moon className="mr-2 h-4 w-4" />
@@ -88,7 +88,7 @@ const UserProfile = () => {
             )}
           </DropdownMenuItem>
           
-          <DropdownMenuItem onClick={handleSettingsClick}>
+          <DropdownMenuItem onClick={handleSettingsClick} className="dark:focus:bg-white/10">
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </DropdownMenuItem>
@@ -97,7 +97,7 @@ const UserProfile = () => {
           
           <DropdownMenuItem 
             onClick={handleLogout}
-            className="text-destructive focus:text-destructive"
+            className="text-destructive focus:text-destructive dark:focus:bg-red-500/10"
           >
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out
@@ -108,16 +108,16 @@ const UserProfile = () => {
       {/* Profile Details Modal/Card */}
       {showDetails && (
         <div 
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-background/80 dark:bg-[#070510]/85 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowDetails(false)}
         >
           <Card 
-            className="w-full max-w-md p-6 glass-elevated animate-in"
+            className="w-full max-w-md p-6 glass-elevated dark:bg-[#11091f]/95 dark:border-white/10 dark:text-white animate-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-brand-700">{initials}</span>
+              <div className="w-16 h-16 rounded-full bg-brand-100 dark:bg-gradient-to-br dark:from-brand-500 dark:to-brand-800 flex items-center justify-center mx-auto mb-4 dark:shadow-[0_0_32px_rgba(139,92,246,0.35)]">
+                <span className="text-2xl font-bold text-brand-700 dark:text-white">{initials}</span>
               </div>
               <h3 className="text-title">
                 {user.firstName || 'User'} {user.lastName || ''}
@@ -154,10 +154,10 @@ const UserProfile = () => {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-border">
+            <div className="mt-6 pt-4 border-t border-border dark:border-white/10">
               <Button 
                 variant="outline" 
-                className="w-full"
+                className="w-full dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
                 onClick={() => setShowDetails(false)}
               >
                 Close

@@ -845,7 +845,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-background dark:bg-[#070510]">
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
@@ -865,8 +865,8 @@ const DashboardPage = () => {
           onStarToggle={handleStarToggle}  // 🔥 ADDED
         />
 
-        <div className="flex-1 flex flex-col relative">
-          <header className="flex items-center justify-between p-4 bg-surface">
+        <div className="flex-1 flex flex-col relative dark:bg-[#070510]">
+          <header className="flex items-center justify-between p-4 bg-surface dark:bg-[#070510] dark:border-b dark:border-white/10">
             <Logo size="sm" />
             <div className="flex items-center gap-3">
               <ConnectionStatus 
