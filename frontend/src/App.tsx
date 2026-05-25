@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
+import LandingPage from "./pages/LandingPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -94,10 +95,10 @@ const AppRoutes = () => (
       } 
     />
     
-    {/* Root redirect - Goes to /auth first, then PublicRoute handles authenticated users */}
+    {/* Landing Route */}
     <Route 
       path="/" 
-      element={<Navigate to="/auth" replace />} 
+      element={<LandingPage />} 
     />
     
     {/* 404 */}
