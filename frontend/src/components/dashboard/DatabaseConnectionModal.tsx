@@ -22,7 +22,7 @@ interface DBCredentials {
   port: string;
   user: string;
   password: string;
-  db_type: 'mysql' | 'postgresql'; // ✨ NEW: Database type
+  db_type: 'mysql' | 'postgresql';
 }
 
 interface ConnectionError {
@@ -34,7 +34,6 @@ interface ConnectionError {
 }
 
 type ConnectionStep = 'credentials' | 'database-selection';
-
 
 const DB_CONFIGS = {
   mysql: {
@@ -53,18 +52,19 @@ const DB_CONFIGS = {
   }
 } as const;
 
+const INITIAL_CREDENTIALS: DBCredentials = {
+  host: '127.0.0.1',
+  port: '3306',
+  user: 'root',
+  password: '',
+  db_type: 'mysql',
+};
+
 export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: DatabaseConnectionModalProps) => {
   // Step management
   const [currentStep, setCurrentStep] = useState<ConnectionStep>('credentials');
-  
-  
-  const [credentials, setCredentials] = useState<DBCredentials>({
-    host: '127.0.0.1',
-    port: '3306',
-    user: 'root',
-    password: '',
-    db_type: 'mysql', 
-  });
+
+  const [credentials, setCredentials] = useState<DBCredentials>(INITIAL_CREDENTIALS);
 
   // Database selection state
   const [availableDatabases, setAvailableDatabases] = useState<string[]>([]);
@@ -80,59 +80,39 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
   const [isLoadingDatabases, setIsLoadingDatabases] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
-  
+
   const { toast } = useToast();
 
-  // ✨ NEW: Handle database type change
+  // Handle database type change
   const handleDatabaseTypeChange = (newType: 'mysql' | 'postgresql') => {
     const newPort = DB_CONFIGS[newType].defaultPort;
     const defaultUser = newType === 'postgresql' ? 'postgres' : 'root';
-    
-    setCredentials(prev => ({ 
-      ...prev, 
+    setCredentials(prev => ({
+      ...prev,
       db_type: newType,
       port: newPort,
-      user: defaultUser // ✅ Auto-update username
+      user: defaultUser,
     }));
-    if (connectionError) {
-      setConnectionError(null);
-    }
+    if (connectionError) setConnectionError(null);
   };
 
   const handleCredentialsChange = (field: keyof DBCredentials, value: string) => {
     setCredentials(prev => ({ ...prev, [field]: value }));
-    if (connectionError) {
-      setConnectionError(null);
-    }
+    if (connectionError) setConnectionError(null);
   };
 
   const handleListDatabases = async () => {
-    // Validate credentials
     if (!credentials.host.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Host Required",
-        description: "Please enter the database host",
-      });
+      toast({ variant: "destructive", title: "Host Required", description: "Please enter the database host" });
       return;
     }
-
     if (!credentials.user.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Username Required",
-        description: "Please enter your database username",
-      });
+      toast({ variant: "destructive", title: "Username Required", description: "Please enter your database username" });
       return;
     }
-
     const portNum = parseInt(credentials.port, 10);
     if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Port",
-        description: "Port must be a number between 1 and 65535",
-      });
+      toast({ variant: "destructive", title: "Invalid Port", description: "Port must be a number between 1 and 65535" });
       return;
     }
 
@@ -148,8 +128,8 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
           port: portNum,
           user: credentials.user.trim(),
           password: credentials.password,
-          db_type: credentials.db_type // ✨ NEW: Send database type
-        })
+          db_type: credentials.db_type,
+        }),
       });
 
       const data = await response.json();
@@ -157,43 +137,36 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
       if (!response.ok) {
         if (data.detail && typeof data.detail === 'object') {
           setConnectionError(data.detail);
-          
           if (data.detail.code === 'AUTH_FAILED') {
-            toast({
-              variant: "destructive",
-              title: "Authentication Failed",
-              description: "Please check your username and password",
-            });
+            toast({ variant: "destructive", title: "Authentication Failed", description: "Please check your username and password" });
           } else if (data.detail.code === 'CONNECTION_REFUSED') {
-            toast({
-              variant: "destructive",
-              title: "Connection Refused",
-              description: `Cannot connect to ${DB_CONFIGS[credentials.db_type].name} server`,
-            });
+            toast({ variant: "destructive", title: "Connection Refused", description: `Cannot connect to ${DB_CONFIGS[credentials.db_type].name} server` });
           }
         } else {
           setConnectionError({
             error: "Connection Error",
             message: data.message || `Failed to connect to ${DB_CONFIGS[credentials.db_type].name} server.`,
-            code: "UNKNOWN_ERROR"
+            code: "UNKNOWN_ERROR",
           });
         }
         return;
       }
 
-      if (data.success) {
-        setAvailableDatabases(data.databases || []);
+      if (data.success && data.databases && data.databases.length > 0) {
+        setAvailableDatabases(data.databases);
         setCurrentStep('database-selection');
         toast({
           title: "✅ Server Connected",
-          description: `Found ${data.databases?.length || 0} database(s) on ${DB_CONFIGS[credentials.db_type].name}`,
+          description: `Found ${data.databases.length} database(s) on ${DB_CONFIGS[credentials.db_type].name}`,
         });
       } else {
-        setConnectionError({
-          error: "No Databases Found",
-          message: "No user databases found on this server.",
-          suggestion: `CREATE DATABASE my_database;`,
-          code: "NO_DATABASES"
+        // BUG FIX: was treating success+empty as error; now navigates to selection step
+        // so user can still create a new database
+        setAvailableDatabases([]);
+        setCurrentStep('database-selection');
+        toast({
+          title: "✅ Server Connected",
+          description: `No user databases found. You can create one below.`,
         });
       }
     } catch (error: any) {
@@ -201,48 +174,25 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
       setConnectionError({
         error: "Network Error",
         message: "Unable to reach the backend server. Please ensure the server is running on port 8000.",
-        suggestion: "Start the backend server using: python main_unified.py",
-        code: "NETWORK_ERROR"
+        suggestion: "Start the backend server using: uvicorn main:app --reload",
+        code: "NETWORK_ERROR",
       });
-      
-      toast({
-        variant: "destructive",
-        title: "Network Error",
-        description: "Cannot connect to backend server",
-      });
+      toast({ variant: "destructive", title: "Network Error", description: "Cannot connect to backend server" });
     } finally {
       setIsLoadingDatabases(false);
     }
   };
 
   const handleCreateDatabase = async () => {
-    // Validate database name
     const dbName = newDatabaseName.trim();
-    
-    if (!dbName) {
-      setCreateError("Database name is required");
-      return;
-    }
-
-    if (!/^[a-zA-Z0-9_]+$/.test(dbName)) {
-      setCreateError("Database name can only contain letters, numbers, and underscores");
-      return;
-    }
-
+    if (!dbName) { setCreateError("Database name is required"); return; }
+    if (!/^[a-zA-Z0-9_]+$/.test(dbName)) { setCreateError("Database name can only contain letters, numbers, and underscores"); return; }
     const maxLength = credentials.db_type === 'postgresql' ? 63 : 64;
-    if (dbName.length > maxLength) {
-      setCreateError(`Database name must be ${maxLength} characters or less`);
-      return;
-    }
-
-    if (availableDatabases.includes(dbName)) {
-      setCreateError(`Database '${dbName}' already exists`);
-      return;
-    }
+    if (dbName.length > maxLength) { setCreateError(`Database name must be ${maxLength} characters or less`); return; }
+    if (availableDatabases.includes(dbName)) { setCreateError(`Database '${dbName}' already exists`); return; }
 
     setCreateError(null);
     setIsCreatingDatabase(true);
-
     const portNum = parseInt(credentials.port, 10);
 
     try {
@@ -255,8 +205,8 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
           user: credentials.user.trim(),
           password: credentials.password,
           database_name: dbName,
-          db_type: credentials.db_type // ✨ NEW: Send database type
-        })
+          db_type: credentials.db_type,
+        }),
       });
 
       const data = await response.json();
@@ -264,19 +214,10 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
       if (!response.ok) {
         if (data.detail && typeof data.detail === 'object') {
           setCreateError(data.detail.message || 'Failed to create database');
-          
           if (data.detail.code === 'PERMISSION_DENIED') {
-            toast({
-              variant: "destructive",
-              title: "Permission Denied",
-              description: `Your ${DB_CONFIGS[credentials.db_type].name} user doesn't have permission to create databases`,
-            });
+            toast({ variant: "destructive", title: "Permission Denied", description: `Your ${DB_CONFIGS[credentials.db_type].name} user doesn't have permission to create databases` });
           } else if (data.detail.code === 'DATABASE_EXISTS') {
-            toast({
-              variant: "destructive",
-              title: "Database Already Exists",
-              description: `Database '${dbName}' already exists`,
-            });
+            toast({ variant: "destructive", title: "Database Already Exists", description: `Database '${dbName}' already exists` });
           }
         } else {
           setCreateError(data.message || 'Failed to create database');
@@ -285,30 +226,20 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
       }
 
       if (data.success) {
-        toast({
-          title: "✅ Database Created!",
-          description: `${DB_CONFIGS[credentials.db_type].name} database '${dbName}' created successfully`,
-          duration: 3000,
-        });
-
-        // Refresh database list and select the new database
+        toast({ title: "✅ Database Created!", description: `${DB_CONFIGS[credentials.db_type].name} database '${dbName}' created successfully`, duration: 3000 });
         setAvailableDatabases(prev => [...prev, dbName].sort());
         setSelectedDatabase(dbName);
-        
-        // Close create dialog and reset
         setShowCreateDialog(false);
         setNewDatabaseName('');
         setCreateError(null);
+      } else {
+        // BUG FIX: handle success:false from server
+        setCreateError(data.message || 'Database creation failed. Please try again.');
       }
     } catch (error: any) {
       console.error('Error creating database:', error);
       setCreateError("Network error: Unable to create database");
-      
-      toast({
-        variant: "destructive",
-        title: "Network Error",
-        description: "Cannot connect to backend server",
-      });
+      toast({ variant: "destructive", title: "Network Error", description: "Cannot connect to backend server" });
     } finally {
       setIsCreatingDatabase(false);
     }
@@ -316,17 +247,12 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
 
   const handleConnect = async () => {
     if (!selectedDatabase) {
-      toast({
-        variant: "destructive",
-        title: "Database Required",
-        description: "Please select a database to connect to",
-      });
+      toast({ variant: "destructive", title: "Database Required", description: "Please select a database to connect to" });
       return;
     }
 
     setConnectionError(null);
     setIsConnecting(true);
-
     const portNum = parseInt(credentials.port, 10);
 
     try {
@@ -339,66 +265,73 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
           user: credentials.user.trim(),
           password: credentials.password,
           database: selectedDatabase,
-          db_type: credentials.db_type // ✨ NEW: Send database type
-        })
+          db_type: credentials.db_type,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        // BUG FIX: error path now falls through to finally → isConnecting resets
         if (data.detail && typeof data.detail === 'object') {
           setConnectionError(data.detail);
         } else {
           setConnectionError({
             error: "Connection Error",
             message: data.message || 'Failed to connect to database',
-            code: "UNKNOWN_ERROR"
+            code: "UNKNOWN_ERROR",
           });
         }
+        toast({
+          variant: "destructive",
+          title: "Connection Failed",
+          description: data.detail?.message || data.message || "Could not connect to the database.",
+        });
         return;
       }
 
       if (data.success) {
-  console.log('[MODAL] Connection successful, calling onConnect with:', {
-    db_type: credentials.db_type,
-    host: credentials.host,
-    port: credentials.port,
-    user: credentials.user,
-    database: selectedDatabase
-  });
-  
-  toast({
-    title: "✅ Connection Successful!",
-    description: `Connected to ${DB_CONFIGS[credentials.db_type].name} database '${selectedDatabase}' successfully.`,
-    duration: 5000,
-  });
-  
-  onConnect({
-    db_type: credentials.db_type, // ✅ Changed from 'type' to 'db_type'
-    host: credentials.host,
-    port: credentials.port,
-    user: credentials.user,
-    password: credentials.password,
-    database: selectedDatabase
-  });
-  
-  console.log('[MODAL] onConnect called, now calling handleClose');
-  handleClose();
-}
+        console.log('[MODAL] Connection successful, calling onConnect');
+        toast({
+          title: "✅ Connection Successful!",
+          description: `Connected to ${DB_CONFIGS[credentials.db_type].name} database '${selectedDatabase}' successfully.`,
+          duration: 5000,
+        });
+        onConnect({
+          db_type: credentials.db_type,
+          host: credentials.host,
+          port: credentials.port,
+          user: credentials.user,
+          password: credentials.password,
+          database: selectedDatabase,
+        });
+        // BUG FIX: call handleClose AFTER onConnect so parent state updates first
+        handleClose();
+      } else {
+        // BUG FIX: was missing else branch — if success:false but 200 OK,
+        // isConnecting was never reset, causing permanent "Connecting..." stuck state
+        setConnectionError({
+          error: "Connection Failed",
+          message: data.message || "Database connection was unsuccessful. Please try again.",
+          code: "CONNECT_FAILED",
+        });
+        toast({
+          variant: "destructive",
+          title: "Connection Failed",
+          description: data.message || "Could not connect to the selected database.",
+        });
+      }
     } catch (error: any) {
       console.error('Error connecting to database:', error);
       setConnectionError({
         error: "Network Error",
         message: "Unable to reach the backend server.",
-        code: "NETWORK_ERROR"
+        code: "NETWORK_ERROR",
       });
-      
-      toast({
-        variant: "destructive",
-        title: "Network Error",
-        description: "Cannot connect to backend server",
-      });
+      toast({ variant: "destructive", title: "Network Error", description: "Cannot connect to backend server" });
     } finally {
+      // BUG FIX: this always runs, resetting the loading spinner
+      // even if an early return was hit inside try block
       setIsConnecting(false);
     }
   };
@@ -409,15 +342,14 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
     setConnectionError(null);
   };
 
+  // BUG FIX: handleClose now resets ALL loading states to prevent stuck spinners
+  // if the modal is closed mid-request
   const handleClose = () => {
+    setIsConnecting(false);
+    setIsLoadingDatabases(false);
+    setIsCreatingDatabase(false);
     setCurrentStep('credentials');
-    setCredentials({
-      host: '127.0.0.1',
-      port: '3306',
-      user: 'root',
-      password: '',
-      db_type: 'mysql'
-    });
+    setCredentials(INITIAL_CREDENTIALS);
     setAvailableDatabases([]);
     setSelectedDatabase('');
     setConnectionError(null);
@@ -439,10 +371,8 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
     setCreateError(null);
   };
 
-  // Get appropriate icon based on error code
   const getErrorIcon = () => {
     if (!connectionError) return null;
-    
     switch (connectionError.code) {
       case 'DATABASE_NOT_FOUND':
       case 'NO_DATABASES':
@@ -464,7 +394,6 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
 
   const getErrorVariant = (): "default" | "destructive" => {
     if (!connectionError) return "default";
-    
     switch (connectionError.code) {
       case 'DATABASE_NOT_FOUND':
       case 'HOST_NOT_FOUND':
@@ -477,7 +406,6 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
 
   const getErrorTitle = () => {
     if (!connectionError) return "";
-    
     const emojiMap: Record<string, string> = {
       'DATABASE_NOT_FOUND': '🗄️',
       'NO_DATABASES': '🗄️',
@@ -486,8 +414,8 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
       'CONNECTION_TIMEOUT': '⏱️',
       'HOST_NOT_FOUND': '🌐',
       'NETWORK_ERROR': '📡',
+      'CONNECT_FAILED': '⚠️',
     };
-    
     const emoji = emojiMap[connectionError.code] || '⚠️';
     return `${emoji} ${connectionError.error}`;
   };
@@ -509,10 +437,8 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
   };
 
   const isCredentialsValid = credentials.host && credentials.port && credentials.user;
-
-  // ✨ NEW: Get current database config
   const currentDbConfig = DB_CONFIGS[credentials.db_type];
-  
+
   return (
     <>
       {/* Main Connection Dialog */}
@@ -521,15 +447,14 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Database className="h-5 w-5 text-primary" />
-              {currentStep === 'credentials' 
-                ? 'Connect to Database Server' 
+              {currentStep === 'credentials'
+                ? 'Connect to Database Server'
                 : `Select ${currentDbConfig.name} Database`}
             </DialogTitle>
             <DialogDescription>
-              {currentStep === 'credentials' 
+              {currentStep === 'credentials'
                 ? 'Choose your database type and enter server credentials'
-                : 'Choose a database to connect to and start querying'
-              }
+                : 'Choose a database to connect to and start querying'}
             </DialogDescription>
           </DialogHeader>
 
@@ -545,15 +470,12 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                   <AlertDescription className="text-sm leading-relaxed">
                     {connectionError.message}
                   </AlertDescription>
-                  
                   {connectionError.suggestion && (
                     <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800 animate-in fade-in-50">
                       <div className="flex items-start gap-2">
                         <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1 space-y-2">
-                          <p className="text-xs font-semibold text-blue-900 dark:text-blue-100">
-                            💡 Solution:
-                          </p>
+                          <p className="text-xs font-semibold text-blue-900 dark:text-blue-100">💡 Solution:</p>
                           <code className="text-xs text-blue-800 dark:text-blue-200 block bg-blue-100 dark:bg-blue-900 p-2 rounded border border-blue-200 dark:border-blue-700 font-mono whitespace-pre-wrap break-all">
                             {connectionError.suggestion}
                           </code>
@@ -569,7 +491,7 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
           <div className="space-y-4 py-2" onKeyPress={handleKeyPress}>
             {currentStep === 'credentials' ? (
               <>
-                {/* ✨ NEW: Database Type Selection */}
+                {/* Database Type Selection */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-1">
                     Database Type <span className="text-red-500">*</span>
@@ -580,13 +502,8 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                     disabled={isLoadingDatabases}
                     className="grid grid-cols-2 gap-3"
                   >
-                    {/* MySQL Option */}
                     <div className="relative">
-                      <RadioGroupItem
-                        value="mysql"
-                        id="mysql"
-                        className="peer sr-only"
-                      />
+                      <RadioGroupItem value="mysql" id="mysql" className="peer sr-only" />
                       <Label
                         htmlFor="mysql"
                         className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
@@ -594,20 +511,12 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                         <div className="text-3xl mb-2">{DB_CONFIGS.mysql.icon}</div>
                         <div className="text-center space-y-1">
                           <div className="font-semibold">{DB_CONFIGS.mysql.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            Port {DB_CONFIGS.mysql.defaultPort}
-                          </div>
+                          <div className="text-xs text-muted-foreground">Port {DB_CONFIGS.mysql.defaultPort}</div>
                         </div>
                       </Label>
                     </div>
-
-                    {/* PostgreSQL Option */}
                     <div className="relative">
-                      <RadioGroupItem
-                        value="postgresql"
-                        id="postgresql"
-                        className="peer sr-only"
-                      />
+                      <RadioGroupItem value="postgresql" id="postgresql" className="peer sr-only" />
                       <Label
                         htmlFor="postgresql"
                         className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
@@ -615,26 +524,22 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                         <div className="text-3xl mb-2">{DB_CONFIGS.postgresql.icon}</div>
                         <div className="text-center space-y-1">
                           <div className="font-semibold">{DB_CONFIGS.postgresql.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            Port {DB_CONFIGS.postgresql.defaultPort}
-                          </div>
+                          <div className="text-xs text-muted-foreground">Port {DB_CONFIGS.postgresql.defaultPort}</div>
                         </div>
                       </Label>
                     </div>
                   </RadioGroup>
-                  <p className="text-xs text-muted-foreground">
-                    {currentDbConfig.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{currentDbConfig.description}</p>
                 </div>
 
-                {/* Step 1: Credentials Form */}
+                {/* Credentials Form */}
                 <div className="space-y-2">
                   <Label htmlFor="host" className="flex items-center gap-1">
                     Host <span className="text-red-500">*</span>
                   </Label>
-                  <Input 
-                    id="host" 
-                    value={credentials.host} 
+                  <Input
+                    id="host"
+                    value={credentials.host}
                     onChange={(e) => handleCredentialsChange('host', e.target.value)}
                     placeholder="127.0.0.1 or localhost"
                     disabled={isLoadingDatabases}
@@ -644,14 +549,14 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                     Server address where {currentDbConfig.name} is running
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="port" className="flex items-center gap-1">
                     Port <span className="text-red-500">*</span>
                   </Label>
-                  <Input 
-                    id="port" 
-                    value={credentials.port} 
+                  <Input
+                    id="port"
+                    value={credentials.port}
                     onChange={(e) => handleCredentialsChange('port', e.target.value)}
                     placeholder={currentDbConfig.defaultPort}
                     disabled={isLoadingDatabases}
@@ -664,55 +569,43 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                     {currentDbConfig.name} server port (default: {currentDbConfig.defaultPort})
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="user" className="flex items-center gap-1">
                     Username <span className="text-red-500">*</span>
                   </Label>
-                  <Input 
-                    id="user" 
-                    value={credentials.user} 
+                  <Input
+                    id="user"
+                    value={credentials.user}
                     onChange={(e) => handleCredentialsChange('user', e.target.value)}
                     placeholder={credentials.db_type === 'postgresql' ? 'postgres' : 'root'}
                     disabled={isLoadingDatabases}
                     className="font-mono"
                     autoComplete="username"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Database username for authentication
-                  </p>
+                  <p className="text-xs text-muted-foreground">Database username for authentication</p>
                 </div>
 
-              
-          
-                
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    value={credentials.password} 
+                  <Input
+                    id="password"
+                    type="password"
+                    value={credentials.password}
                     onChange={(e) => handleCredentialsChange('password', e.target.value)}
                     placeholder="Enter password (if any)"
                     disabled={isLoadingDatabases}
                     autoComplete="current-password"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Leave blank if no password is set
-                  </p>
+                  <p className="text-xs text-muted-foreground">Leave blank if no password is set</p>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleClose} 
-                    disabled={isLoadingDatabases}
-                  >
+                  <Button variant="outline" onClick={handleClose} disabled={isLoadingDatabases}>
                     Cancel
                   </Button>
-                  <Button 
-                    onClick={handleListDatabases} 
+                  <Button
+                    onClick={handleListDatabases}
                     disabled={!isCredentialsValid || isLoadingDatabases}
                     className="min-w-[140px]"
                   >
@@ -755,17 +648,23 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                     disabled={isConnecting}
                   >
                     <SelectTrigger id="database" className="w-full font-mono">
-                      <SelectValue placeholder="Choose a database..." />
+                      <SelectValue placeholder={availableDatabases.length === 0 ? "No databases — create one below" : "Choose a database..."} />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableDatabases.map((db) => (
-                        <SelectItem key={db} value={db} className="font-mono">
-                          <div className="flex items-center gap-2">
-                            <Database className="h-4 w-4 text-muted-foreground" />
-                            {db}
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {availableDatabases.length === 0 ? (
+                        <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                          No databases found. Create one below.
+                        </div>
+                      ) : (
+                        availableDatabases.map((db) => (
+                          <SelectItem key={db} value={db} className="font-mono">
+                            <div className="flex items-center gap-2">
+                              <Database className="h-4 w-4 text-muted-foreground" />
+                              {db}
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
@@ -784,18 +683,13 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
                   Create New Database
                 </Button>
 
-                {/* Action Buttons */}
                 <div className="flex justify-between gap-2 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleBack} 
-                    disabled={isConnecting}
-                  >
+                  <Button variant="outline" onClick={handleBack} disabled={isConnecting}>
                     <ChevronLeft className="w-4 h-4 mr-2" />
                     Back
                   </Button>
-                  <Button 
-                    onClick={handleConnect} 
+                  <Button
+                    onClick={handleConnect}
                     disabled={!selectedDatabase || isConnecting}
                     className="min-w-[120px]"
                   >
@@ -832,7 +726,6 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
           </DialogHeader>
 
           <div className="space-y-4 py-2" onKeyPress={handleCreateKeyPress}>
-            {/* Error Alert */}
             {createError && (
               <Alert variant="destructive" className="animate-in slide-in-from-top-2">
                 <AlertCircle className="h-4 w-4" />
@@ -848,10 +741,7 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
               <Input
                 id="newDbName"
                 value={newDatabaseName}
-                onChange={(e) => {
-                  setNewDatabaseName(e.target.value);
-                  setCreateError(null);
-                }}
+                onChange={(e) => { setNewDatabaseName(e.target.value); setCreateError(null); }}
                 placeholder="my_database"
                 disabled={isCreatingDatabase}
                 className="font-mono"
@@ -862,7 +752,6 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
               </p>
             </div>
 
-            {/* Info Box */}
             <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-3">
               <div className="flex items-start gap-2">
                 <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
@@ -877,13 +766,8 @@ export const DatabaseConnectionModal = ({ isOpen, onClose, onConnect }: Database
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={closeCreateDialog}
-                disabled={isCreatingDatabase}
-              >
+              <Button variant="outline" onClick={closeCreateDialog} disabled={isCreatingDatabase}>
                 Cancel
               </Button>
               <Button
