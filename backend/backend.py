@@ -136,7 +136,7 @@ class DatabaseConnectionPool:
     """Thread-safe pool of SQLAlchemy engines and LangChain SQLDatabase objects."""
 
     def __init__(self) -> None:
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._engines: Dict[str, Any] = {}
         self._sql_dbs: Dict[str, SQLDatabase] = {}
         self._db_types: Dict[str, str] = {}
